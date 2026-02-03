@@ -16,7 +16,6 @@ body{
   height:100vh;
 }
 
-/* APP CONTAINER */
 .app{
   width:94%;
   max-width:420px;
@@ -25,19 +24,16 @@ body{
   padding:18px;
   text-align:center;
   box-shadow:0 12px 28px rgba(0,0,0,.15);
-
   display:flex;
   flex-direction:column;
 }
 
-/* ORDERING */
 h1{ order:1; margin:0; color:#2e7d32; }
 .quote-box{ order:2; }
 img{ order:3; }
 .controls{ order:4; }
 textarea{ order:5; }
 
-/* TEXT INPUT */
 textarea{
   width:100%;
   min-height:70px;
@@ -49,41 +45,53 @@ textarea{
   resize:none;
 }
 
-/* QUOTE DISPLAY — 4:5 CARD */
+/* ✅ FIXED QUOTE BOX */
 .quote-box{
   width:100%;
-  aspect-ratio: 4 / 5;          /* 👈 मुख्य बदलाव */
-  min-height:260px;             /* fallback (पुराने browser) */
+  aspect-ratio:4/5;
+  min-height:260px;
+
+  margin:14px 0;
+  padding:16px;
+
+  display:flex;
+  flex-wrap:wrap;              /* 🔥 FIX */
+  align-content:center;
+  justify-content:center;
+  text-align:center;
 
   font-size:20px;
   line-height:1.8;
   font-weight:600;
 
-  margin:14px 0;
-  padding:16px;
-
-  display:flex;                 /* टेक्स्ट को केंद्र में रखने के लिए */
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-
-  word-break:normal;
   overflow-wrap:break-word;
+}
+
+/* ✅ FIXED CHAR */
+.char{
+  display:inline;
+  white-space:normal;          /* 🔥 FIX */
+  transition:transform .2s;
+}
+.char.active{
+  transform:scale(1.25);
 }
 
 /* IMAGE */
 img{
   width:100%;
-  max-width:300px;      /* 👈 चौड़ाई कम */
-  height:auto;          /* अनुपात सुरक्षित */
-  aspect-ratio: 4 / 5;  /* 👈 सुंदर कार्ड जैसा अनुपात */
-  object-fit:cover;     /* इमेज कटे बिना फिट */
-
+  max-width:300px;
+  aspect-ratio:4/5;
+  object-fit:cover;
   border-radius:14px;
-  margin:10px auto;     /* center */
+  margin:10px auto;
   display:block;
+}
 
-  transition:transform .6s, box-shadow .6s, filter .6s;
+.controls{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
 }
 
 button{
@@ -108,12 +116,11 @@ input[type=file]{ display:none; }
 <div class="app">
   <h1>🌱 सुविचार</h1>
 
-  <div id="quoteBox" class="quote-box" aria-live="polite"></div>
+  <div id="quoteBox" class="quote-box"></div>
 
   <img id="quoteImg"
-       alt="सुविचार चित्र"
        src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe"
-       onerror="this.style.display='none'"/>
+       alt="सुविचार चित्र"/>
 
   <div class="controls">
     <button id="playBtn">🎴 कार्ड बनाओ</button>
@@ -122,123 +129,45 @@ input[type=file]{ display:none; }
   </div>
 
   <textarea id="inputText" placeholder="अपना सुविचार लिखें..."></textarea>
-
   <input type="file" id="imgInput" accept="image/*">
 </div>
 
 <script>
-(() => {
-  "use strict";
+const inputText = document.getElementById("inputText");
+const quoteBox  = document.getElementById("quoteBox");
 
-  const inputText = document.getElementById("inputText");
-  const quoteBox  = document.getElementById("quoteBox");
-  const quoteImg  = document.getElementById("quoteImg");
-  const imgInput  = document.getElementById("imgInput");
+let timer=null;
+const COLORS=["#e53935","#8e24aa","#3949ab","#039be5","#00897b","#7cb342"];
 
-  const playBtn  = document.getElementById("playBtn");
-  const themeBtn = document.getElementById("themeBtn");
-  const imgBtn   = document.getElementById("imgBtn");
+function playSuVichar(){
+  const text=inputText.value.trim();
+  if(!text) return;
 
-  let wordTimer = null;
+  quoteBox.innerHTML="";
+  if(timer) clearInterval(timer);
 
-  /* COLORS */
-  const COLORS = [
-    "#e53935","#8e24aa","#3949ab",
-    "#039be5","#00897b",
-    "#7cb342","#f9a825",
-    "#fb8c00","#6d4c41"
-  ];
+  const words=text.split(" ");
+  let i=0;
 
-  function randomColor(){
-    return COLORS[Math.floor(Math.random()*COLORS.length)];
-  }
+  timer=setInterval(()=>{
+    const span=document.createElement("span");
+    span.className="char active";
+    span.style.color=COLORS[Math.floor(Math.random()*COLORS.length)];
 
-  /* THEMES */
-  const THEMES = [
-    ["#fdf6e3","#e0f2f1"],
-    ["#fce4ec","#f3e5f5"],
-    ["#e3f2fd","#fff3e0"],
-    ["#ede7f6","#e8f5e9"]
-  ];
-  let themeIndex = 0;
+    const w=words[i];
+    span.textContent=w+" ";
 
-  function changeTheme(){
-    themeIndex = (themeIndex + 1) % THEMES.length;
-    document.body.style.background =
-      `linear-gradient(135deg,${THEMES[themeIndex][0]},${THEMES[themeIndex][1]})`;
-  }
+    quoteBox.appendChild(span);
 
-  /* VOICE */
-  function speak(text){
-    if(!("speechSynthesis" in window)) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "hi-IN";
-    u.rate = 0.75;
-    u.pitch = 1.05;
-    speechSynthesis.speak(u);
-  }
+    const prev=quoteBox.querySelectorAll(".char");
+    if(prev.length>1) prev[prev.length-2].classList.remove("active");
 
-  /* MAIN LOGIC */
-  function playSuVichar(){
-    const text = inputText.value.trim();
-    if(!text){
-      alert("कृपया सुविचार लिखें");
-      return;
-    }
+    i++;
+    if(i>=words.length) clearInterval(timer);
+  },300);
+}
 
-    quoteBox.innerHTML = "";
-    speak(text);
-
-    quoteImg.classList.add("pulse");
-    setTimeout(()=>quoteImg.classList.remove("pulse"),1500);
-
-    if(wordTimer) clearInterval(wordTimer);
-
-    const words = text.split(" ");
-    let i = 0;
-
-    wordTimer = setInterval(()=>{
-      const span = document.createElement("span");
-      span.className = "char active";
-      span.style.color = randomColor();
-
-      const w = words[i];
-      const needsSpace = !/[।.,!?"]$/.test(w);
-      span.innerHTML = w + (needsSpace ? "&nbsp;" : "");
-
-      quoteBox.appendChild(span);
-
-      const prev = quoteBox.querySelectorAll(".char");
-      if(prev.length > 1){
-        prev[prev.length - 2].classList.remove("active");
-      }
-
-      i++;
-      if(i >= words.length){
-        clearInterval(wordTimer);
-        wordTimer = null;
-      }
-    }, 300);
-  }
-
-  function pickImage(){
-    imgInput.click();
-  }
-
-  imgInput.addEventListener("change", () => {
-    const file = imgInput.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => quoteImg.src = e.target.result;
-    reader.readAsDataURL(file);
-  });
-
-  playBtn.onclick  = playSuVichar;
-  themeBtn.onclick = changeTheme;
-  imgBtn.onclick   = pickImage;
-
-})();
+document.getElementById("playBtn").onclick=playSuVichar;
 </script>
 
 </body>

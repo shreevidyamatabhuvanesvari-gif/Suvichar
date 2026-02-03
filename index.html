@@ -36,6 +36,7 @@ textarea{
   border:1px solid #ccc;
   font-size:15px;
   margin-top:10px;
+  resize:none;
 }
 
 .quote-box{
@@ -49,7 +50,7 @@ textarea{
 
 .char{
   display:inline-block;
-  white-space:pre; /* 🔥 स्पेस कभी गायब नहीं होगा */
+  white-space:pre;
   transition:transform .2s;
 }
 .char.active{
@@ -98,112 +99,131 @@ input[type=file]{ display:none; }
 
   <textarea id="inputText" placeholder="अपना सुविचार लिखें..."></textarea>
 
-  <div id="quoteBox" class="quote-box"></div>
+  <div id="quoteBox" class="quote-box" aria-live="polite"></div>
 
-  <img id="quoteImg" 
-       src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe" />
+  <img id="quoteImg"
+       alt="सुविचार चित्र"
+       src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe"
+       onerror="this.style.display='none'"/>
 
   <input type="file" id="imgInput" accept="image/*">
 
   <div class="controls">
-    <button onclick="playSuVichar()">🎴 कार्ड बनाओ</button>
-    <button class="secondary" onclick="changeTheme()">🎨 थीम बदलो</button>
-    <button class="gray" onclick="pickImage()">📷 इमेज जोड़ो</button>
+    <button id="playBtn">🎴 कार्ड बनाओ</button>
+    <button class="secondary" id="themeBtn">🎨 थीम बदलो</button>
+    <button class="gray" id="imgBtn">📷 इमेज जोड़ो</button>
   </div>
 </div>
 
 <script>
-const inputText = document.getElementById("inputText");
-const quoteBox  = document.getElementById("quoteBox");
-const quoteImg  = document.getElementById("quoteImg");
-const imgInput  = document.getElementById("imgInput");
+(() => {
+  "use strict";
 
-/* रंग */
-function randomColor(){
-  const colors = [
+  const inputText = document.getElementById("inputText");
+  const quoteBox  = document.getElementById("quoteBox");
+  const quoteImg  = document.getElementById("quoteImg");
+  const imgInput  = document.getElementById("imgInput");
+
+  const playBtn  = document.getElementById("playBtn");
+  const themeBtn = document.getElementById("themeBtn");
+  const imgBtn   = document.getElementById("imgBtn");
+
+  let charTimer = null;
+
+  /* रंग */
+  const COLORS = [
     "#e53935","#8e24aa","#3949ab",
     "#039be5","#00897b",
     "#7cb342","#f9a825",
     "#fb8c00","#6d4c41"
   ];
-  return colors[Math.floor(Math.random()*colors.length)];
-}
 
-/* थीम */
-const themes = [
-  ["#fdf6e3","#e0f2f1"],
-  ["#fce4ec","#f3e5f5"],
-  ["#e3f2fd","#fff3e0"],
-  ["#ede7f6","#e8f5e9"]
-];
-let themeIndex = 0;
-
-function changeTheme(){
-  themeIndex = (themeIndex+1)%themes.length;
-  document.body.style.background =
-    `linear-gradient(135deg,${themes[themeIndex][0]},${themes[themeIndex][1]})`;
-}
-
-/* आवाज़ */
-function speak(text){
-  if(!("speechSynthesis" in window)) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "hi-IN";
-  u.rate = 0.75;   // इंसानी स्पीड
-  u.pitch = 1.05;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-}
-
-/* मुख्य लॉजिक */
-function playSuVichar(){
-  const text = inputText.value;
-  if(!text.trim()){
-    alert("कृपया सुविचार लिखें");
-    return;
+  function randomColor(){
+    return COLORS[Math.floor(Math.random()*COLORS.length)];
   }
 
-  quoteBox.innerHTML = "";
-  speak(text);
+  /* थीम */
+  const THEMES = [
+    ["#fdf6e3","#e0f2f1"],
+    ["#fce4ec","#f3e5f5"],
+    ["#e3f2fd","#fff3e0"],
+    ["#ede7f6","#e8f5e9"]
+  ];
+  let themeIndex = 0;
 
-  // इमेज रिएक्शन
-  quoteImg.classList.add("pulse");
-  setTimeout(()=>quoteImg.classList.remove("pulse"),1500);
+  function changeTheme(){
+    themeIndex = (themeIndex+1)%THEMES.length;
+    document.body.style.background =
+      `linear-gradient(135deg,${THEMES[themeIndex][0]},${THEMES[themeIndex][1]})`;
+  }
 
-  const chars = Array.from(text); // 🔥 Unicode-safe
-  let i = 0;
+  /* आवाज़ */
+  function speak(text){
+    if(!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "hi-IN";
+    u.rate = 0.75;
+    u.pitch = 1.05;
+    speechSynthesis.speak(u);
+  }
 
-  const timer = setInterval(()=>{
-    const span = document.createElement("span");
-    span.className = "char active";
-    span.style.color = randomColor();
-    span.textContent = chars[i];
-    quoteBox.appendChild(span);
-
-    const prev = quoteBox.querySelectorAll(".char");
-    if(prev.length > 1){
-      prev[prev.length-2].classList.remove("active");
+  /* मुख्य लॉजिक */
+  function playSuVichar(){
+    const text = inputText.value.trim();
+    if(!text){
+      alert("कृपया सुविचार लिखें");
+      return;
     }
 
-    i++;
-    if(i >= chars.length){
-      clearInterval(timer);
-    }
-  }, 140); // 👈 यही सही मानव स्पीड
-}
+    quoteBox.innerHTML = "";
+    speak(text);
 
-/* इमेज चुनना */
-function pickImage(){
-  imgInput.click();
-}
+    quoteImg.classList.add("pulse");
+    setTimeout(()=>quoteImg.classList.remove("pulse"),1500);
 
-imgInput.onchange = function(){
-  const file = this.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => quoteImg.src = e.target.result;
-  reader.readAsDataURL(file);
-};
+    if(charTimer) clearInterval(charTimer);
+
+    const chars = Array.from(text);
+    let i = 0;
+
+    charTimer = setInterval(()=>{
+      const span = document.createElement("span");
+      span.className = "char active";
+      span.style.color = randomColor();
+      span.textContent = chars[i];
+      quoteBox.appendChild(span);
+
+      const prev = quoteBox.querySelectorAll(".char");
+      if(prev.length > 1){
+        prev[prev.length-2].classList.remove("active");
+      }
+
+      i++;
+      if(i >= chars.length){
+        clearInterval(charTimer);
+        charTimer = null;
+      }
+    }, 140);
+  }
+
+  function pickImage(){
+    imgInput.click();
+  }
+
+  imgInput.addEventListener("change", () => {
+    const file = imgInput.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => quoteImg.src = e.target.result;
+    reader.readAsDataURL(file);
+  });
+
+  playBtn.onclick  = playSuVichar;
+  themeBtn.onclick = changeTheme;
+  imgBtn.onclick   = pickImage;
+
+})();
 </script>
 
 </body>

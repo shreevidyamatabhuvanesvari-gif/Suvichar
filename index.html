@@ -94,6 +94,9 @@ button{
 
   <!-- Button -->
   <button onclick="makeCard()">कार्ड बनाओ</button>
+  <button onclick="CardEngine.nextTheme(cardBox)">
+  🎨 थीम बदलो
+  </button>
 
   <!-- Card Preview -->
   <div class="card" id="cardBox">
@@ -105,6 +108,7 @@ button{
 
 <!-- IMAGE PICKER CORE -->
 <script src="image.js"></script>
+  <script src="card.js"></script>
 
 <script>
 function makeCard(){

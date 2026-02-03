@@ -188,14 +188,14 @@ function playSuVichar(){
   quoteImg.classList.add("pulse");
   setTimeout(()=>quoteImg.classList.remove("pulse"),1200);
 
-  let i=0;
-  const chars = text.split("");
+  let i = 0;
+  const chars = Array.from(text);   // 👈 यही असली fix है
 
   const timer = setInterval(()=>{
     const span = document.createElement("span");
     span.className="char active";
     span.style.color=randomColor();
-    span.textContent=chars[i];
+    span.textContent = chars[i];
     quoteBox.appendChild(span);
 
     const prev = quoteBox.querySelectorAll(".char");
@@ -204,10 +204,9 @@ function playSuVichar(){
     }
 
     i++;
-    if(i>=chars.length) clearInterval(timer);
-  },60);
+    if(i >= chars.length) clearInterval(timer);
+  }, 110);   // 👈 human teacher speed
 }
-
 /* ===============================
    IMAGE PICKER
    =============================== */

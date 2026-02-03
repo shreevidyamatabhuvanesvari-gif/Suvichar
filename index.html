@@ -44,11 +44,12 @@ textarea{
   line-height:1.6;
   margin:14px 0;
   font-weight:600;
-  word-wrap:break-word;
+  word-break:break-word;
 }
 
 .char{
   display:inline-block;
+  white-space:pre; /* 🔥 स्पेस कभी गायब नहीं होगा */
   transition:transform .2s;
 }
 .char.active{
@@ -59,11 +60,12 @@ img{
   width:100%;
   border-radius:14px;
   margin:10px 0;
-  transition:transform .6s, box-shadow .6s;
+  transition:transform .6s, box-shadow .6s, filter .6s;
 }
 img.pulse{
   transform:scale(1.05);
-  box-shadow:0 0 20px rgba(0,150,136,.5);
+  box-shadow:0 0 25px rgba(0,150,136,.6);
+  filter:brightness(1.1);
 }
 
 .controls{
@@ -142,65 +144,64 @@ function changeTheme(){
     `linear-gradient(135deg,${themes[themeIndex][0]},${themes[themeIndex][1]})`;
 }
 
-/* TTS */
+/* आवाज़ */
 function speak(text){
   if(!("speechSynthesis" in window)) return;
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "hi-IN";
-  u.rate = 0.85;
+  u.rate = 0.75;   // इंसानी स्पीड
   u.pitch = 1.05;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
 
-/* मुख्य फंक्शन */
+/* मुख्य लॉजिक */
 function playSuVichar(){
-  const text = inputText.value.trim();
-  if(!text){
+  const text = inputText.value;
+  if(!text.trim()){
     alert("कृपया सुविचार लिखें");
     return;
   }
 
-  quoteBox.innerHTML="";
+  quoteBox.innerHTML = "";
   speak(text);
 
+  // इमेज रिएक्शन
   quoteImg.classList.add("pulse");
-  setTimeout(()=>quoteImg.classList.remove("pulse"),1200);
+  setTimeout(()=>quoteImg.classList.remove("pulse"),1500);
 
+  const chars = Array.from(text); // 🔥 Unicode-safe
   let i = 0;
-  const chars = Array.from(text); // Unicode safe
 
   const timer = setInterval(()=>{
     const span = document.createElement("span");
-    span.className="char active";
-    span.style.color=randomColor();
-
-    // 🔑 असली FIX — space का इलाज
-    span.textContent = (chars[i] === " ") ? "\u00A0" : chars[i];
-
+    span.className = "char active";
+    span.style.color = randomColor();
+    span.textContent = chars[i];
     quoteBox.appendChild(span);
 
     const prev = quoteBox.querySelectorAll(".char");
-    if(prev.length>1){
+    if(prev.length > 1){
       prev[prev.length-2].classList.remove("active");
     }
 
     i++;
-    if(i >= chars.length) clearInterval(timer);
-  }, 120); // human speed
+    if(i >= chars.length){
+      clearInterval(timer);
+    }
+  }, 140); // 👈 यही सही मानव स्पीड
 }
 
-/* Image Picker */
+/* इमेज चुनना */
 function pickImage(){
   imgInput.click();
 }
+
 imgInput.onchange = function(){
-  const file=this.files[0];
+  const file = this.files[0];
   if(!file) return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    quoteImg.src=e.target.result;
-  };
+  const reader = new FileReader();
+  reader.onload = e => quoteImg.src = e.target.result;
   reader.readAsDataURL(file);
 };
 </script>

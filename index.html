@@ -8,74 +8,88 @@
 <style>
 body{
   margin:0;
-  font-family:system-ui;
-  background:#f3f6fb;
+  font-family:system-ui,"Noto Sans Devanagari",sans-serif;
+  background:linear-gradient(135deg,#fdf6e3,#e0f2f1);
   display:flex;
-  justify-content:center;
   align-items:center;
-  min-height:100vh;
+  justify-content:center;
+  height:100vh;
 }
 
 .app{
-  width:95%;
+  width:94%;
   max-width:420px;
   background:#ffffff;
-  border-radius:20px;
-  padding:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  border-radius:22px;
+  padding:18px;
+  text-align:center;
+  box-shadow:0 12px 28px rgba(0,0,0,.15);
 }
 
-h1{
-  text-align:center;
-  margin:6px 0 12px 0;
-}
+h1{margin:0;color:#2e7d32}
 
 textarea{
   width:100%;
-  min-height:80px;
+  min-height:70px;
   padding:10px;
   border-radius:12px;
   border:1px solid #ccc;
   font-size:15px;
-  resize:none;
-  margin-bottom:10px;
+  margin-top:10px;
 }
 
-input[type=file]{
+.quote-box{
+  min-height:90px;
+  font-size:20px;
+  line-height:1.6;
+  margin:14px 0;
+  font-weight:600;
+}
+
+.char{
+  display:inline-block;
+  transition:transform .2s;
+}
+.char.active{
+  transform:scale(1.3);
+}
+
+img{
   width:100%;
-  margin-bottom:10px;
+  border-radius:14px;
+  margin:10px 0;
+  transition:transform .6s, box-shadow .6s;
+}
+img.pulse{
+  transform:scale(1.05);
+  box-shadow:0 0 20px rgba(0,150,136,.5);
+}
+
+.controls{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
 }
 
 button{
-  width:100%;
-  padding:12px;
+  flex:1;
+  padding:10px;
   border:none;
-  border-radius:14px;
-  background:#4f46e5;
-  color:white;
-  font-size:15px;
+  border-radius:12px;
+  background:#2e7d32;
+  color:#fff;
+  font-size:14px;
   cursor:pointer;
 }
+button.secondary{
+  background:#1565c0;
+}
+button.gray{
+  background:#555;
+}
 
-.card{
-  margin-top:14px;
-  padding:12px;
-  border-radius:16px;
-  background:linear-gradient(135deg,#fff7e6,#e6f0ff);
-  text-align:center;
+input[type=file]{
   display:none;
-}
-
-.card img{
-  max-width:100%;
-  border-radius:14px;
-  margin-bottom:10px;
-}
-
-.quote{
-  font-size:18px;
-  font-weight:500;
-  line-height:1.4;
 }
 </style>
 </head>
@@ -83,47 +97,123 @@ button{
 <body>
 
 <div class="app">
-
   <h1>🌱 सुविचार</h1>
 
-  <!-- Quote Input -->
-  <textarea id="quoteInput" placeholder="यहाँ सुविचार लिखें..."></textarea>
+  <!-- Input -->
+  <textarea id="inputText" placeholder="अपना सुविचार लिखें..."></textarea>
 
-  <!-- Image Picker -->
-  <input type="file" id="imageInput" accept="image/*">
+  <!-- Output Board -->
+  <div id="quoteBox" class="quote-box"></div>
 
-  <!-- Button -->
-  <button onclick="makeCard()">कार्ड बनाओ</button>
-  <button onclick="CardEngine.nextTheme(cardBox)">
-  🎨 थीम बदलो
-  </button>
+  <!-- Image -->
+  <img id="quoteImg" 
+       src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe" />
 
-  <!-- Card Preview -->
-  <div class="card" id="cardBox">
-    <img id="previewImg" style="display:none;">
-    <div class="quote" id="quoteText"></div>
+  <!-- Hidden file input -->
+  <input type="file" id="imgInput" accept="image/*">
+
+  <!-- Controls -->
+  <div class="controls">
+    <button onclick="playSuVichar()">🎴 कार्ड बनाओ</button>
+    <button class="secondary" onclick="changeTheme()">🎨 थीम बदलो</button>
+    <button class="gray" onclick="pickImage()">📷 इमेज जोड़ो</button>
   </div>
-
 </div>
 
-<!-- IMAGE PICKER CORE -->
-<script src="image.js"></script>
-  <script src="card.js"></script>
-
 <script>
-function makeCard(){
-  const text = document.getElementById("quoteInput").value.trim();
-  const quoteText = document.getElementById("quoteText");
-  const cardBox = document.getElementById("cardBox");
-
-  if(!text){
-    alert("कृपया सुविचार लिखें");
-    return;
-  }
-
-  quoteText.textContent = text;
-  cardBox.style.display = "block";
+/* ===============================
+   COLOR GENERATOR
+   =============================== */
+function randomColor(){
+  const colors = [
+    "#e53935","#8e24aa","#3949ab",
+    "#039be5","#00897b",
+    "#7cb342","#f9a825",
+    "#fb8c00","#6d4c41"
+  ];
+  return colors[Math.floor(Math.random()*colors.length)];
 }
+
+/* ===============================
+   THEMES
+   =============================== */
+const themes = [
+  ["#fdf6e3","#e0f2f1"],
+  ["#fce4ec","#f3e5f5"],
+  ["#e3f2fd","#fff3e0"],
+  ["#ede7f6","#e8f5e9"]
+];
+let themeIndex = 0;
+
+function changeTheme(){
+  themeIndex = (themeIndex+1)%themes.length;
+  document.body.style.background =
+    `linear-gradient(135deg,${themes[themeIndex][0]},${themes[themeIndex][1]})`;
+}
+
+/* ===============================
+   TTS (Embedded)
+   =============================== */
+function speak(text){
+  if(!("speechSynthesis" in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "hi-IN";
+  u.rate = 0.85;
+  u.pitch = 1.05;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+/* ===============================
+   TYPEWRITER + COLOR
+   =============================== */
+function playSuVichar(){
+  const text = inputText.value.trim();
+  if(!text) return alert("सुविचार लिखें");
+
+  const box = document.getElementById("quoteBox");
+  const img = document.getElementById("quoteImg");
+
+  box.innerHTML="";
+  speak(text);
+
+  img.classList.add("pulse");
+  setTimeout(()=>img.classList.remove("pulse"),1200);
+
+  let i=0;
+  const chars=text.split("");
+
+  const timer=setInterval(()=>{
+    const span=document.createElement("span");
+    span.className="char active";
+    span.style.color=randomColor();
+    span.textContent=chars[i];
+    box.appendChild(span);
+
+    const prev=box.querySelectorAll(".char");
+    if(prev.length>1)
+      prev[prev.length-2].classList.remove("active");
+
+    i++;
+    if(i>=chars.length) clearInterval(timer);
+  },60);
+}
+
+/* ===============================
+   IMAGE PICKER
+   =============================== */
+function pickImage(){
+  imgInput.click();
+}
+imgInput.onchange = function(){
+  const file=this.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    quoteImg.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
 </script>
 
 </body>

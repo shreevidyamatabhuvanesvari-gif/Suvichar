@@ -42,10 +42,11 @@ textarea{
 .quote-box{
   min-height:90px;
   font-size:20px;
-  line-height:1.6;
+  line-height:1.8;
   margin:14px 0;
   font-weight:600;
-  word-break:break-word;
+  word-break:normal;
+  overflow-wrap:break-word;
 }
 
 .char{
@@ -170,42 +171,45 @@ input[type=file]{ display:none; }
 
   /* मुख्य लॉजिक */
   function playSuVichar(){
-    const text = inputText.value.trim();
-    if(!text){
-      alert("कृपया सुविचार लिखें");
-      return;
+  const text = inputText.value.trim();
+  if(!text){
+    alert("कृपया सुविचार लिखें");
+    return;
+  }
+
+  quoteBox.innerHTML = "";
+  speak(text);
+
+  quoteImg.classList.add("pulse");
+  setTimeout(()=>quoteImg.classList.remove("pulse"),1500);
+
+  if(charTimer) clearInterval(charTimer);
+
+  // 🔑 शब्दों में तोड़ना (space सुरक्षित)
+  const words = text.split(" ");
+  let i = 0;
+
+  charTimer = setInterval(()=>{
+    const span = document.createElement("span");
+    span.className = "char active";
+    span.style.color = randomColor();
+
+    // शब्द + एक space
+    span.innerHTML = words[i] + "&nbsp;";
+    quoteBox.appendChild(span);
+
+    const prev = quoteBox.querySelectorAll(".char");
+    if(prev.length > 1){
+      prev[prev.length-2].classList.remove("active");
     }
 
-    quoteBox.innerHTML = "";
-    speak(text);
-
-    quoteImg.classList.add("pulse");
-    setTimeout(()=>quoteImg.classList.remove("pulse"),1500);
-
-    if(charTimer) clearInterval(charTimer);
-
-    const chars = Array.from(text);
-    let i = 0;
-
-    charTimer = setInterval(()=>{
-      const span = document.createElement("span");
-      span.className = "char active";
-      span.style.color = randomColor();
-      span.textContent = chars[i];
-      quoteBox.appendChild(span);
-
-      const prev = quoteBox.querySelectorAll(".char");
-      if(prev.length > 1){
-        prev[prev.length-2].classList.remove("active");
-      }
-
-      i++;
-      if(i >= chars.length){
-        clearInterval(charTimer);
-        charTimer = null;
-      }
-    }, 140);
-  }
+    i++;
+    if(i >= words.length){
+      clearInterval(charTimer);
+      charTimer = null;
+    }
+  }, 300); // 👈 शब्दों के लिए सही मानवीय स्पीड
+}
 
   function pickImage(){
     imgInput.click();

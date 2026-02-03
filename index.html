@@ -49,24 +49,26 @@ textarea{
   resize:none;
 }
 
-/* QUOTE DISPLAY */
+/* QUOTE DISPLAY — 4:5 CARD */
 .quote-box{
-  min-height:90px;
+  width:100%;
+  aspect-ratio: 4 / 5;          /* 👈 मुख्य बदलाव */
+  min-height:260px;             /* fallback (पुराने browser) */
+
   font-size:20px;
-  line-height:4.5;
-  margin:14px 0;
+  line-height:1.8;
   font-weight:600;
+
+  margin:14px 0;
+  padding:16px;
+
+  display:flex;                 /* टेक्स्ट को केंद्र में रखने के लिए */
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+
   word-break:normal;
   overflow-wrap:break-word;
-}
-
-.char{
-  display:inline-block;
-  white-space:pre;
-  transition:transform .2s;
-}
-.char.active{
-  transform:scale(1.3);
 }
 
 /* IMAGE */

@@ -44,6 +44,7 @@ textarea{
   line-height:1.6;
   margin:14px 0;
   font-weight:600;
+  word-wrap:break-word;
 }
 
 .char{
@@ -81,16 +82,10 @@ button{
   font-size:14px;
   cursor:pointer;
 }
-button.secondary{
-  background:#1565c0;
-}
-button.gray{
-  background:#555;
-}
+button.secondary{ background:#1565c0; }
+button.gray{ background:#555; }
 
-input[type=file]{
-  display:none;
-}
+input[type=file]{ display:none; }
 </style>
 </head>
 
@@ -99,20 +94,15 @@ input[type=file]{
 <div class="app">
   <h1>🌱 सुविचार</h1>
 
-  <!-- Input -->
   <textarea id="inputText" placeholder="अपना सुविचार लिखें..."></textarea>
 
-  <!-- Output Board -->
   <div id="quoteBox" class="quote-box"></div>
 
-  <!-- Image -->
   <img id="quoteImg" 
        src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe" />
 
-  <!-- Hidden file input -->
   <input type="file" id="imgInput" accept="image/*">
 
-  <!-- Controls -->
   <div class="controls">
     <button onclick="playSuVichar()">🎴 कार्ड बनाओ</button>
     <button class="secondary" onclick="changeTheme()">🎨 थीम बदलो</button>
@@ -121,17 +111,12 @@ input[type=file]{
 </div>
 
 <script>
-/* ===============================
-   SAFE DOM REFERENCES
-   =============================== */
 const inputText = document.getElementById("inputText");
 const quoteBox  = document.getElementById("quoteBox");
 const quoteImg  = document.getElementById("quoteImg");
 const imgInput  = document.getElementById("imgInput");
 
-/* ===============================
-   COLOR GENERATOR
-   =============================== */
+/* रंग */
 function randomColor(){
   const colors = [
     "#e53935","#8e24aa","#3949ab",
@@ -142,9 +127,7 @@ function randomColor(){
   return colors[Math.floor(Math.random()*colors.length)];
 }
 
-/* ===============================
-   THEMES
-   =============================== */
+/* थीम */
 const themes = [
   ["#fdf6e3","#e0f2f1"],
   ["#fce4ec","#f3e5f5"],
@@ -159,9 +142,7 @@ function changeTheme(){
     `linear-gradient(135deg,${themes[themeIndex][0]},${themes[themeIndex][1]})`;
 }
 
-/* ===============================
-   TTS (SOFT HUMAN)
-   =============================== */
+/* TTS */
 function speak(text){
   if(!("speechSynthesis" in window)) return;
   const u = new SpeechSynthesisUtterance(text);
@@ -172,9 +153,7 @@ function speak(text){
   speechSynthesis.speak(u);
 }
 
-/* ===============================
-   TYPEWRITER + MULTICOLOR
-   =============================== */
+/* मुख्य फंक्शन */
 function playSuVichar(){
   const text = inputText.value.trim();
   if(!text){
@@ -185,20 +164,19 @@ function playSuVichar(){
   quoteBox.innerHTML="";
   speak(text);
 
-  // Image reaction (अब साफ दिखेगी)
   quoteImg.classList.add("pulse");
   setTimeout(()=>quoteImg.classList.remove("pulse"),1200);
 
   let i = 0;
-  const chars = Array.from(text);
+  const chars = Array.from(text); // Unicode safe
 
   const timer = setInterval(()=>{
     const span = document.createElement("span");
     span.className="char active";
-    span.style.color = randomColor();
+    span.style.color=randomColor();
 
-    // 🔑 यही असली fix
-    span.textContent = chars[i] === " " ? "\u00A0" : chars[i];
+    // 🔑 असली FIX — space का इलाज
+    span.textContent = (chars[i] === " ") ? "\u00A0" : chars[i];
 
     quoteBox.appendChild(span);
 
@@ -209,15 +187,13 @@ function playSuVichar(){
 
     i++;
     if(i >= chars.length) clearInterval(timer);
-  }, 140);   // human reading speed
-  }
-/* ===============================
-   IMAGE PICKER
-   =============================== */
+  }, 120); // human speed
+}
+
+/* Image Picker */
 function pickImage(){
   imgInput.click();
 }
-
 imgInput.onchange = function(){
   const file=this.files[0];
   if(!file) return;

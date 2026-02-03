@@ -195,7 +195,9 @@ input[type=file]{ display:none; }
     span.style.color = randomColor();
 
     // शब्द + एक space
-    span.innerHTML = words[i] + "&nbsp;";
+    const w = words[i];
+const needsSpace = !/[।.,!?"]$/.test(w);
+span.innerHTML = w + (needsSpace ? "&nbsp;" : "");
     quoteBox.appendChild(span);
 
     const prev = quoteBox.querySelectorAll(".char");

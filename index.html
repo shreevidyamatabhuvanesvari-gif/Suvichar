@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>सुविचार</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,"Noto Sans Devanagari",sans-serif;
+  background:#f5f7fa;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.app{
+  width:95%;
+  max-width:420px;
+  background:#ffffff;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+h1{
+  margin:0;
+  text-align:center;
+  color:#2c3e50;
+}
+
+textarea{
+  width:100%;
+  min-height:100px;
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+  font-size:15px;
+  resize:none;
+}
+
+button{
+  width:100%;
+  margin-top:12px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#4a69bd;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.card{
+  margin-top:20px;
+  padding:16px;
+  border-radius:14px;
+  background:#f0f3ff;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:16px;
+  color:#2c3e50;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h1>🌱 सुविचार</h1>
+
+  <textarea id="thoughtInput" placeholder="यहाँ अपना सुविचार लिखें..."></textarea>
+  
+  <button onclick="makeCard()">कार्ड बनाओ</button>
+
+  <div class="card" id="cardBox">
+    आपका सुविचार यहाँ दिखेगा...
+  </div>
+</div>
+
+<script>
+function makeCard(){
+  const text = document.getElementById("thoughtInput").value.trim();
+  const card = document.getElementById("cardBox");
+
+  if(!text){
+    card.textContent = "पहले कोई सुविचार लिखिए 🙂";
+    return;
+  }
+
+  card.textContent = text;
+}
+</script>
+
+</body>
+</html>

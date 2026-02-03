@@ -16,6 +16,7 @@ body{
   height:100vh;
 }
 
+/* APP CONTAINER */
 .app{
   width:94%;
   max-width:420px;
@@ -24,10 +25,19 @@ body{
   padding:18px;
   text-align:center;
   box-shadow:0 12px 28px rgba(0,0,0,.15);
+
+  display:flex;
+  flex-direction:column;
 }
 
-h1{margin:0;color:#2e7d32}
+/* ORDERING */
+h1{ order:1; margin:0; color:#2e7d32; }
+.quote-box{ order:2; }
+img{ order:3; }
+.controls{ order:4; }
+textarea{ order:5; }
 
+/* TEXT INPUT */
 textarea{
   width:100%;
   min-height:70px;
@@ -35,10 +45,11 @@ textarea{
   border-radius:12px;
   border:1px solid #ccc;
   font-size:15px;
-  margin-top:10px;
+  margin-top:12px;
   resize:none;
 }
 
+/* QUOTE DISPLAY */
 .quote-box{
   min-height:90px;
   font-size:20px;
@@ -58,6 +69,7 @@ textarea{
   transform:scale(1.3);
 }
 
+/* IMAGE */
 img{
   width:100%;
   border-radius:14px;
@@ -70,6 +82,7 @@ img.pulse{
   filter:brightness(1.1);
 }
 
+/* CONTROLS */
 .controls{
   display:flex;
   gap:8px;
@@ -98,8 +111,6 @@ input[type=file]{ display:none; }
 <div class="app">
   <h1>🌱 सुविचार</h1>
 
-  <textarea id="inputText" placeholder="अपना सुविचार लिखें..."></textarea>
-
   <div id="quoteBox" class="quote-box" aria-live="polite"></div>
 
   <img id="quoteImg"
@@ -107,13 +118,15 @@ input[type=file]{ display:none; }
        src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe"
        onerror="this.style.display='none'"/>
 
-  <input type="file" id="imgInput" accept="image/*">
-
   <div class="controls">
     <button id="playBtn">🎴 कार्ड बनाओ</button>
     <button class="secondary" id="themeBtn">🎨 थीम बदलो</button>
     <button class="gray" id="imgBtn">📷 इमेज जोड़ो</button>
   </div>
+
+  <textarea id="inputText" placeholder="अपना सुविचार लिखें..."></textarea>
+
+  <input type="file" id="imgInput" accept="image/*">
 </div>
 
 <script>
@@ -129,9 +142,9 @@ input[type=file]{ display:none; }
   const themeBtn = document.getElementById("themeBtn");
   const imgBtn   = document.getElementById("imgBtn");
 
-  let charTimer = null;
+  let wordTimer = null;
 
-  /* रंग */
+  /* COLORS */
   const COLORS = [
     "#e53935","#8e24aa","#3949ab",
     "#039be5","#00897b",
@@ -143,7 +156,7 @@ input[type=file]{ display:none; }
     return COLORS[Math.floor(Math.random()*COLORS.length)];
   }
 
-  /* थीम */
+  /* THEMES */
   const THEMES = [
     ["#fdf6e3","#e0f2f1"],
     ["#fce4ec","#f3e5f5"],
@@ -153,12 +166,12 @@ input[type=file]{ display:none; }
   let themeIndex = 0;
 
   function changeTheme(){
-    themeIndex = (themeIndex+1)%THEMES.length;
+    themeIndex = (themeIndex + 1) % THEMES.length;
     document.body.style.background =
       `linear-gradient(135deg,${THEMES[themeIndex][0]},${THEMES[themeIndex][1]})`;
   }
 
-  /* आवाज़ */
+  /* VOICE */
   function speak(text){
     if(!("speechSynthesis" in window)) return;
     speechSynthesis.cancel();
@@ -169,49 +182,48 @@ input[type=file]{ display:none; }
     speechSynthesis.speak(u);
   }
 
-  /* मुख्य लॉजिक */
+  /* MAIN LOGIC */
   function playSuVichar(){
-  const text = inputText.value.trim();
-  if(!text){
-    alert("कृपया सुविचार लिखें");
-    return;
+    const text = inputText.value.trim();
+    if(!text){
+      alert("कृपया सुविचार लिखें");
+      return;
+    }
+
+    quoteBox.innerHTML = "";
+    speak(text);
+
+    quoteImg.classList.add("pulse");
+    setTimeout(()=>quoteImg.classList.remove("pulse"),1500);
+
+    if(wordTimer) clearInterval(wordTimer);
+
+    const words = text.split(" ");
+    let i = 0;
+
+    wordTimer = setInterval(()=>{
+      const span = document.createElement("span");
+      span.className = "char active";
+      span.style.color = randomColor();
+
+      const w = words[i];
+      const needsSpace = !/[।.,!?"]$/.test(w);
+      span.innerHTML = w + (needsSpace ? "&nbsp;" : "");
+
+      quoteBox.appendChild(span);
+
+      const prev = quoteBox.querySelectorAll(".char");
+      if(prev.length > 1){
+        prev[prev.length - 2].classList.remove("active");
+      }
+
+      i++;
+      if(i >= words.length){
+        clearInterval(wordTimer);
+        wordTimer = null;
+      }
+    }, 300);
   }
-
-  quoteBox.innerHTML = "";
-  speak(text);
-
-  quoteImg.classList.add("pulse");
-  setTimeout(()=>quoteImg.classList.remove("pulse"),1500);
-
-  if(charTimer) clearInterval(charTimer);
-
-  // 🔑 शब्दों में तोड़ना (space सुरक्षित)
-  const words = text.split(" ");
-  let i = 0;
-
-  charTimer = setInterval(()=>{
-    const span = document.createElement("span");
-    span.className = "char active";
-    span.style.color = randomColor();
-
-    // शब्द + एक space
-    const w = words[i];
-const needsSpace = !/[।.,!?"]$/.test(w);
-span.innerHTML = w + (needsSpace ? "&nbsp;" : "");
-    quoteBox.appendChild(span);
-
-    const prev = quoteBox.querySelectorAll(".char");
-    if(prev.length > 1){
-      prev[prev.length-2].classList.remove("active");
-    }
-
-    i++;
-    if(i >= words.length){
-      clearInterval(charTimer);
-      charTimer = null;
-    }
-  }, 300); // 👈 शब्दों के लिए सही मानवीय स्पीड
-}
 
   function pickImage(){
     imgInput.click();

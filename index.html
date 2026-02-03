@@ -60,6 +60,7 @@ img{
   margin:10px 0;
   transition:transform .6s, box-shadow .6s;
 }
+
 img.pulse{
   transform:scale(1.05);
   box-shadow:0 0 20px rgba(0,150,136,.5);
@@ -106,115 +107,27 @@ input[type=file]{
   <div id="quoteBox" class="quote-box"></div>
 
   <!-- Image -->
-  <img id="quoteImg" 
+  <img id="quoteImg"
        src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe" />
 
-  <!-- Hidden file input -->
+  <!-- Hidden File Input -->
   <input type="file" id="imgInput" accept="image/*">
 
   <!-- Controls -->
   <div class="controls">
-    <button onclick="playSuVichar()">🎴 कार्ड बनाओ</button>
+    <button onclick="createCard()">🎴 कार्ड बनाओ</button>
     <button class="secondary" onclick="changeTheme()">🎨 थीम बदलो</button>
     <button class="gray" onclick="pickImage()">📷 इमेज जोड़ो</button>
   </div>
 </div>
 
-<script>
-/* ===============================
-   COLOR GENERATOR
-   =============================== */
-function randomColor(){
-  const colors = [
-    "#e53935","#8e24aa","#3949ab",
-    "#039be5","#00897b",
-    "#7cb342","#f9a825",
-    "#fb8c00","#6d4c41"
-  ];
-  return colors[Math.floor(Math.random()*colors.length)];
-}
+<!-- ================= CORE SCRIPTS ================= -->
 
-/* ===============================
-   THEMES
-   =============================== */
-const themes = [
-  ["#fdf6e3","#e0f2f1"],
-  ["#fce4ec","#f3e5f5"],
-  ["#e3f2fd","#fff3e0"],
-  ["#ede7f6","#e8f5e9"]
-];
-let themeIndex = 0;
+<!-- IMAGE PICKER CORE -->
+<script src="image.js"></script>
 
-function changeTheme(){
-  themeIndex = (themeIndex+1)%themes.length;
-  document.body.style.background =
-    `linear-gradient(135deg,${themes[themeIndex][0]},${themes[themeIndex][1]})`;
-}
-
-/* ===============================
-   TTS (Embedded)
-   =============================== */
-function speak(text){
-  if(!("speechSynthesis" in window)) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "hi-IN";
-  u.rate = 0.85;
-  u.pitch = 1.05;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-}
-
-/* ===============================
-   TYPEWRITER + COLOR
-   =============================== */
-function playSuVichar(){
-  const text = inputText.value.trim();
-  if(!text) return alert("सुविचार लिखें");
-
-  const box = document.getElementById("quoteBox");
-  const img = document.getElementById("quoteImg");
-
-  box.innerHTML="";
-  speak(text);
-
-  img.classList.add("pulse");
-  setTimeout(()=>img.classList.remove("pulse"),1200);
-
-  let i=0;
-  const chars=text.split("");
-
-  const timer=setInterval(()=>{
-    const span=document.createElement("span");
-    span.className="char active";
-    span.style.color=randomColor();
-    span.textContent=chars[i];
-    box.appendChild(span);
-
-    const prev=box.querySelectorAll(".char");
-    if(prev.length>1)
-      prev[prev.length-2].classList.remove("active");
-
-    i++;
-    if(i>=chars.length) clearInterval(timer);
-  },60);
-}
-
-/* ===============================
-   IMAGE PICKER
-   =============================== */
-function pickImage(){
-  imgInput.click();
-}
-imgInput.onchange = function(){
-  const file=this.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    quoteImg.src=e.target.result;
-  };
-  reader.readAsDataURL(file);
-};
-</script>
+<!-- CARD + TTS CORE -->
+<script src="card.js"></script>
 
 </body>
 </html>

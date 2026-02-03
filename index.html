@@ -16,7 +16,7 @@ body{
   justify-content:center;
 }
 
-/* 9:16 FRAME */
+/* ====== 9:16 VIDEO FRAME ====== */
 .stage{
   width:100%;
   max-width:420px;
@@ -25,9 +25,10 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
+  transition:all .3s ease;
 }
 
-/* 4:5 CARD */
+/* ====== 4:5 CARD ====== */
 .card{
   width:90%;
   aspect-ratio:4/5;
@@ -42,7 +43,7 @@ body{
   text-align:center;
 }
 
-/* BRAND */
+/* ====== BRAND ====== */
 .brand{
   position:absolute;
   bottom:10px;
@@ -52,13 +53,13 @@ body{
   color:rgba(0,0,0,.45);
 }
 
-/* ✅ QUOTE — NORMAL TEXT FLOW */
+/* ====== QUOTE ====== */
 .quote-box{
   font-size:20px;
   line-height:1.8;
   font-weight:600;
   padding:12px;
-  white-space:pre-wrap;     /* 🔥 MOST IMPORTANT */
+  white-space:pre-wrap;
   word-break:normal;
   overflow-wrap:break-word;
 }
@@ -72,7 +73,7 @@ body{
   transform:scale(1.2);
 }
 
-/* IMAGE */
+/* ====== IMAGE ====== */
 img{
   width:100%;
   max-height:40%;
@@ -81,7 +82,7 @@ img{
   margin:10px 0;
 }
 
-/* CONTROLS */
+/* ====== CONTROLS ====== */
 .controls{
   display:flex;
   gap:8px;
@@ -111,12 +112,18 @@ textarea{
 }
 
 input[type=file]{display:none;}
+
+/* ====== 🔒 CAPTURE MODE (Facebook Ready) ====== */
+.capture-mode textarea,
+.capture-mode .controls{
+  display:none;
+}
 </style>
 </head>
 
 <body>
 
-<div class="stage">
+<div class="stage" id="stage">
   <div class="card">
 
     <div id="quoteBox" class="quote-box"></div>
@@ -144,6 +151,7 @@ const inputText = document.getElementById("inputText");
 const quoteBox  = document.getElementById("quoteBox");
 const quoteImg  = document.getElementById("quoteImg");
 const imgInput  = document.getElementById("imgInput");
+const stage     = document.getElementById("stage");
 
 let timer=null;
 
@@ -168,13 +176,16 @@ function speak(text){
   speechSynthesis.speak(u);
 }
 
-/* 🎴 PLAY */
+/* 🎴 PLAY + CAPTURE MODE */
 function playSuVichar(){
   const text=inputText.value.trim();
   if(!text) return;
 
   quoteBox.textContent="";
   speak(text);
+
+  // 🔒 Facebook-ready mode ON
+  stage.classList.add("capture-mode");
 
   if(timer) clearInterval(timer);
 
@@ -185,7 +196,7 @@ function playSuVichar(){
     const span=document.createElement("span");
     span.className="char active";
     span.style.color=COLORS[Math.floor(Math.random()*COLORS.length)];
-    span.textContent = words[i] + "\u00A0"; // ✅ SAFE SPACE
+    span.textContent = words[i] + "\u00A0";
 
     quoteBox.appendChild(span);
 
@@ -203,7 +214,7 @@ function playSuVichar(){
 /* 🎨 THEME */
 function changeTheme(){
   themeIndex=(themeIndex+1)%THEMES.length;
-  document.querySelector(".stage").style.background=
+  stage.style.background=
     `linear-gradient(135deg,${THEMES[themeIndex][0]},${THEMES[themeIndex][1]})`;
 }
 

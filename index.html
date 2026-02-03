@@ -72,21 +72,16 @@ textarea{
 /* IMAGE */
 img{
   width:100%;
-  border-radius:14px;
-  margin:10px 0;
-  transition:transform .6s, box-shadow .6s, filter .6s;
-}
-img.pulse{
-  transform:scale(1.05);
-  box-shadow:0 0 25px rgba(0,150,136,.6);
-  filter:brightness(1.1);
-}
+  max-width:300px;      /* 👈 चौड़ाई कम */
+  height:auto;          /* अनुपात सुरक्षित */
+  aspect-ratio: 4 / 3;  /* 👈 सुंदर कार्ड जैसा अनुपात */
+  object-fit:cover;     /* इमेज कटे बिना फिट */
 
-/* CONTROLS */
-.controls{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
+  border-radius:14px;
+  margin:10px auto;     /* center */
+  display:block;
+
+  transition:transform .6s, box-shadow .6s, filter .6s;
 }
 
 button{

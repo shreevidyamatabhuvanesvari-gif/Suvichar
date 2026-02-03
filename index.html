@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>सुविचार</title>
+<title>🌱 सुविचार</title>
 
 <style>
 body{
   margin:0;
-  font-family:system-ui,"Noto Sans Devanagari",sans-serif;
-  background:#f5f7fa;
+  font-family:system-ui;
+  background:#f3f6fb;
   display:flex;
   justify-content:center;
   align-items:center;
@@ -20,52 +20,62 @@ body{
   width:95%;
   max-width:420px;
   background:#ffffff;
-  border-radius:18px;
-  padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
 }
 
 h1{
-  margin:0;
   text-align:center;
-  color:#2c3e50;
+  margin:6px 0 12px 0;
 }
 
 textarea{
   width:100%;
-  min-height:100px;
-  margin-top:12px;
-  padding:12px;
+  min-height:80px;
+  padding:10px;
   border-radius:12px;
   border:1px solid #ccc;
   font-size:15px;
   resize:none;
+  margin-bottom:10px;
+}
+
+input[type=file]{
+  width:100%;
+  margin-bottom:10px;
 }
 
 button{
   width:100%;
-  margin-top:12px;
   padding:12px;
   border:none;
-  border-radius:12px;
-  background:#4a69bd;
+  border-radius:14px;
+  background:#4f46e5;
   color:white;
-  font-size:16px;
+  font-size:15px;
   cursor:pointer;
 }
 
 .card{
-  margin-top:20px;
-  padding:16px;
-  border-radius:14px;
-  background:#f0f3ff;
-  min-height:60px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  margin-top:14px;
+  padding:12px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#fff7e6,#e6f0ff);
   text-align:center;
-  font-size:16px;
-  color:#2c3e50;
+  display:none;
+}
+
+.card img{
+  max-width:100%;
+  border-radius:14px;
+  margin-bottom:10px;
+}
+
+.quote{
+  font-size:18px;
+  font-weight:500;
+  line-height:1.4;
 }
 </style>
 </head>
@@ -73,28 +83,42 @@ button{
 <body>
 
 <div class="app">
+
   <h1>🌱 सुविचार</h1>
 
-  <textarea id="thoughtInput" placeholder="यहाँ अपना सुविचार लिखें..."></textarea>
-  
+  <!-- Quote Input -->
+  <textarea id="quoteInput" placeholder="यहाँ सुविचार लिखें..."></textarea>
+
+  <!-- Image Picker -->
+  <input type="file" id="imageInput" accept="image/*">
+
+  <!-- Button -->
   <button onclick="makeCard()">कार्ड बनाओ</button>
 
+  <!-- Card Preview -->
   <div class="card" id="cardBox">
-    आपका सुविचार यहाँ दिखेगा...
+    <img id="previewImg" style="display:none;">
+    <div class="quote" id="quoteText"></div>
   </div>
+
 </div>
+
+<!-- IMAGE PICKER CORE -->
+<script src="image.js"></script>
 
 <script>
 function makeCard(){
-  const text = document.getElementById("thoughtInput").value.trim();
-  const card = document.getElementById("cardBox");
+  const text = document.getElementById("quoteInput").value.trim();
+  const quoteText = document.getElementById("quoteText");
+  const cardBox = document.getElementById("cardBox");
 
   if(!text){
-    card.textContent = "पहले कोई सुविचार लिखिए 🙂";
+    alert("कृपया सुविचार लिखें");
     return;
   }
 
-  card.textContent = text;
+  quoteText.textContent = text;
+  cardBox.style.display = "block";
 }
 </script>
 

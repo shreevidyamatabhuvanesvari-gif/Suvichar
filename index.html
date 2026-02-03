@@ -6,6 +6,10 @@
 <title>🌱 सुविचार • ShriVidya</title>
 
 <style>
+/* ===== RESET ===== */
+*{box-sizing:border-box}
+
+/* ===== PAGE ===== */
 body{
   margin:0;
   font-family:system-ui,"Noto Sans Devanagari",sans-serif;
@@ -16,7 +20,7 @@ body{
   justify-content:center;
 }
 
-/* 9:16 VIDEO FRAME */
+/* ===== 9:16 STAGE ===== */
 .stage{
   width:100%;
   max-width:420px;
@@ -27,7 +31,7 @@ body{
   justify-content:center;
 }
 
-/* 4:5 CARD */
+/* ===== 4:5 CARD ===== */
 .card{
   width:90%;
   aspect-ratio:4/5;
@@ -42,7 +46,7 @@ body{
   text-align:center;
 }
 
-/* BRAND */
+/* ===== BRAND ===== */
 .brand{
   position:absolute;
   bottom:10px;
@@ -52,28 +56,31 @@ body{
   color:rgba(0,0,0,.45);
 }
 
-/* QUOTE */
+/* ===== QUOTE ===== */
 .quote-box{
   flex:1;
   display:flex;
-  flex-wrap:wrap;
+  flex-wrap:wrap;              /* 🔥 CRITICAL */
   align-content:center;
   justify-content:center;
   font-size:20px;
   line-height:1.8;
   font-weight:600;
   padding:10px;
+  word-break:normal;
+  overflow-wrap:break-word;
 }
 
 .char{
   display:inline;
+  white-space:normal;          /* 🔥 CRITICAL */
   transition:transform .2s;
 }
 .char.active{
   transform:scale(1.25);
 }
 
-/* IMAGE */
+/* ===== IMAGE ===== */
 img{
   width:100%;
   max-height:40%;
@@ -82,7 +89,7 @@ img{
   margin:10px 0;
 }
 
-/* CONTROLS */
+/* ===== CONTROLS ===== */
 .controls{
   display:flex;
   gap:8px;
@@ -141,12 +148,19 @@ input[type=file]{display:none;}
 <input type="file" id="imgInput" accept="image/*">
 
 <script>
+"use strict";
+
 const inputText = document.getElementById("inputText");
 const quoteBox  = document.getElementById("quoteBox");
 const quoteImg  = document.getElementById("quoteImg");
 const imgInput  = document.getElementById("imgInput");
 
+const playBtn  = document.getElementById("playBtn");
+const themeBtn = document.getElementById("themeBtn");
+const imgBtn   = document.getElementById("imgBtn");
+
 let timer=null;
+
 const COLORS=["#e53935","#8e24aa","#3949ab","#039be5","#00897b","#7cb342"];
 
 const THEMES=[
@@ -178,7 +192,7 @@ function playSuVichar(){
 
   if(timer) clearInterval(timer);
 
-  const words=text.split(" ");
+  const words=text.split(/\s+/);
   let i=0;
 
   timer=setInterval(()=>{
@@ -194,8 +208,11 @@ function playSuVichar(){
     if(prev.length>1) prev[prev.length-2].classList.remove("active");
 
     i++;
-    if(i>=words.length) clearInterval(timer);
-  },300);
+    if(i>=words.length){
+      clearInterval(timer);
+      timer=null;
+    }
+  },280);
 }
 
 /* 🎨 THEME */
@@ -207,17 +224,19 @@ function changeTheme(){
 
 /* 📷 IMAGE */
 function pickImage(){ imgInput.click(); }
-imgInput.onchange=()=>{
+
+imgInput.addEventListener("change",()=>{
   const f=imgInput.files[0];
   if(!f) return;
   const r=new FileReader();
   r.onload=e=>quoteImg.src=e.target.result;
   r.readAsDataURL(f);
-};
+});
 
-document.getElementById("playBtn").onclick=playSuVichar;
-document.getElementById("themeBtn").onclick=changeTheme;
-document.getElementById("imgBtn").onclick=pickImage;
+/* EVENTS */
+playBtn.onclick  = playSuVichar;
+themeBtn.onclick = changeTheme;
+imgBtn.onclick   = pickImage;
 </script>
 
 </body>
